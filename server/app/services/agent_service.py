@@ -1,69 +1,116 @@
 import json
+import re
 import google.generativeai as genai
 from app.config import settings
 from app.services.retrieval_service import search_vault_chunks
 
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
-def search_vault(query: str, max_results: int = 5) -> dict:
-    """
-    Search the user's Obsidian vault for relevant notes. Use this to find information before drafting emails.
-    Always search before making claims about the user's projects, plans, or data.
-    
-    Args:
-        query: Semantic search query to find relevant notes
-        max_results: Number of results to return (default 5, max 10)
-    """
-    results = search_vault_chunks(query, limit=max_results)
-    return {"results": results}
+SYSTEM_PROMPT = """\
+You are VaultMail, an AI email drafting assistant grounded in the user's Obsidian knowledge base.
 
-SYSTEM_PROMPT = """
-You are VaultMail, an AI email drafting assistant. You have access to the user's Obsidian knowledge base through a search tool.
+The user will provide you with:
+- Their email request
+- Relevant excerpts retrieved from their vault
 
-When the user asks you to draft an email:
-1. ALWAYS search the vault first to find relevant information. 
-2. Draft the email using ONLY information found in the vault + the user's explicit request.
-3. If the vault doesn't contain relevant information, say so clearly — do NOT make up facts. Mark missing information as "[NOT FOUND IN VAULT — please fill in]".
-4. Output the final result as a JSON object with three keys:
-   - "subject": The subject line of the email
-   - "body": The HTML formatted body of the email
-   - "sources": A list of sources used, where each source is an object with "title" (the note_title), "file" (the source_file path), and "excerpt" (a short relevant snippet).
+Your task:
+1. Draft the email using ONLY the provided vault excerpts + the user's explicit request.
+2. If specific details are missing from the excerpts, mark them as "[NOT FOUND IN VAULT — please fill in]".
+3. Return ONLY a valid JSON object with exactly three keys:
+   - "subject": the email subject line (string)
+   - "body": the full email body as plain text (string)
+   - "sources": list of objects, each with "title", "file", and "excerpt" keys
 
-NEVER invent personal details, dates, numbers, or commitments not found in the vault.
+NEVER invent names, dates, numbers, or commitments not present in the provided excerpts.
+Output ONLY the raw JSON object. No markdown, no explanation, no extra text.
 """
 
-def generate_email_draft(prompt: str, to_email: str = "") -> dict:
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        tools=[search_vault],
-        system_instruction=SYSTEM_PROMPT,
-        generation_config={"response_mime_type": "application/json"}
-    )
-    
-    # We use enable_automatic_function_calling so Gemini handles the loop
-    chat = model.start_chat(enable_automatic_function_calling=True)
-    
-    # Optional enhancement: Force retrieval by manually querying if we want strict control,
-    # but Gemini handles automatic tool calling well when instructed to ALWAYS search.
-    
-    full_prompt = f"Draft an email based on this request: {prompt}"
-    if to_email:
-        full_prompt += f"\nRecipient: {to_email}"
-        
+def _parse_json_response(text: str) -> dict:
+    """Try to extract a JSON object from the model's text response."""
+    text = text.strip()
     try:
-        response = chat.send_message(full_prompt)
-        
-        # Parse the JSON response
-        result_dict = json.loads(response.text)
-        
-        # Format to match our API spec exactly
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    # Strip markdown fences if present
+    match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(1))
+        except json.JSONDecodeError:
+            pass
+    # Find any JSON object
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError:
+            pass
+    # Fallback
+    return {"subject": "Draft Email", "body": text, "sources": []}
+
+
+async def generate_email_draft(prompt: str, to_email: str = "") -> dict:
+    """
+    Two-step RAG pipeline (no Gemini function-calling):
+      1. We run the semantic search ourselves.
+      2. We inject the results as context into a single Gemini prompt.
+    """
+    # --- Step 1: Retrieve relevant chunks from Qdrant (local, fast) ---
+    chunks = search_vault_chunks(prompt, limit=5)
+
+    if chunks:
+        context_parts = []
+        for i, chunk in enumerate(chunks, 1):
+            context_parts.append(
+                f"[Excerpt {i}]\n"
+                f"Note: {chunk.get('note_title', 'Unknown')}\n"
+                f"File: {chunk.get('source_file', '')}\n"
+                f"---\n{chunk.get('text', '')}\n"
+            )
+        vault_context = "\n".join(context_parts)
+    else:
+        vault_context = "No relevant notes found in the vault."
+
+    # --- Step 2: Ask Gemini to draft using the retrieved context ---
+    full_prompt = f"User request: {prompt}"
+    if to_email:
+        full_prompt += f"\nRecipient email: {to_email}"
+    full_prompt += f"\n\nVault excerpts:\n{vault_context}"
+
+    # No tools=[] here — plain text generation, fast and reliable
+    model = genai.GenerativeModel(
+        model_name="gemini-3.5-flash",
+        system_instruction=SYSTEM_PROMPT,
+    )
+
+    try:
+        response = await model.generate_content_async(
+            full_prompt,
+            request_options={"timeout": 60.0}
+        )
+
+        result_dict = _parse_json_response(response.text)
+
+        # Build sources from the retrieved chunks so we always have them
+        sources = result_dict.get("sources", [])
+        if not sources and chunks:
+            sources = [
+                {
+                    "title": c.get("note_title", "Unknown"),
+                    "file": c.get("source_file", ""),
+                    "excerpt": c.get("text", "")[:200]
+                }
+                for c in chunks
+            ]
+
         return {
             "draft": {
                 "subject": result_dict.get("subject", "Draft Email"),
                 "body": result_dict.get("body", ""),
                 "to": to_email
             },
-            "sources": result_dict.get("sources", [])
+            "sources": sources
         }
     except Exception as e:
         print(f"Agent error: {e}")

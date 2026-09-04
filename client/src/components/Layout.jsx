@@ -1,11 +1,14 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Mail, HardDrive, FolderOpen, LayoutDashboard } from 'lucide-react';
+import { Mail, HardDrive, FolderOpen, LayoutDashboard, PenLine, History } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
 
 export default function Layout() {
   const navItems = [
     { to: "/", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
     { to: "/upload", icon: <HardDrive size={20} />, label: "Vault Upload" },
     { to: "/vault", icon: <FolderOpen size={20} />, label: "Vault Browser" },
+    { to: "/compose", icon: <PenLine size={20} />, label: "Compose Email" },
+    { to: "/history", icon: <History size={20} />, label: "Email History" },
   ];
 
   return (
@@ -49,6 +52,7 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+      <Toaster position="bottom-right" />
     </div>
   );
 }
