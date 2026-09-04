@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import VaultUpload from './pages/VaultUpload';
 import VaultBrowser from './pages/VaultBrowser';
 import ComposePage from './pages/ComposePage';
+import HistoryPage from './pages/HistoryPage';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="upload" element={<VaultUpload />} />
           <Route path="vault" element={<VaultBrowser />} />
           <Route path="compose" element={<ComposePage />} />
+          <Route path="history" element={<HistoryPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

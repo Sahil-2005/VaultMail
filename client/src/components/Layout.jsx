@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Mail, HardDrive, FolderOpen, LayoutDashboard, PenLine } from 'lucide-react';
+import { Mail, HardDrive, FolderOpen, LayoutDashboard, PenLine, History } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
 export default function Layout() {
@@ -8,6 +8,7 @@ export default function Layout() {
     { to: "/upload", icon: <HardDrive size={20} />, label: "Vault Upload" },
     { to: "/vault", icon: <FolderOpen size={20} />, label: "Vault Browser" },
     { to: "/compose", icon: <PenLine size={20} />, label: "Compose Email" },
+    { to: "/history", icon: <History size={20} />, label: "Email History" },
   ];
 
   return (
