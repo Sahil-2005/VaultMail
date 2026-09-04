@@ -10,8 +10,10 @@ from app.config import settings
 HISTORY_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "email_history.json")
 
 def send_email(to: str, subject: str, body_html: str):
-    if not settings.GMAIL_ADDRESS or not settings.GMAIL_APP_PASSWORD:
-        raise ValueError("Gmail credentials not configured")
+    if not to or not to.strip():
+        raise ValueError("Recipient address cannot be empty")
+    if not settings.GMAIL_ADDRESS or not settings.GMAIL_APP_PASSWORD or settings.GMAIL_ADDRESS == "your_email@gmail.com":
+        raise ValueError("Gmail credentials not properly configured in .env file")
         
     msg = MIMEMultipart("alternative")
     msg["From"] = f"VaultMail <{settings.GMAIL_ADDRESS}>"
