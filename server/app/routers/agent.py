@@ -11,4 +11,4 @@ class DraftRequest(BaseModel):
 
 @router.post("/draft-email")
 async def draft_email(req: DraftRequest):
-    return generate_email_draft(req.prompt, req.to_email)
+    return await generate_email_draft(req.prompt, req.to_email)
