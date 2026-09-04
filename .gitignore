@@ -1,0 +1,33 @@
+# Node.js / React
+node_modules/
+dist/
+build/
+npm-debug.log
+yarn-error.log
+.eslintcache
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+.venv/
+.pytest_cache/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDEs / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# VaultMail specific
+server/data/
+server/email_history.json
+# (Note: sample_vault/ is kept in version control intentionally for testing)
