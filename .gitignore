@@ -31,5 +31,5 @@ Thumbs.db
 server/data/
 server/email_history.json
 # (Note: sample_vault/ is kept in version control intentionally for testing)
-
 implementation_plan.md
+QUICK_START.md
