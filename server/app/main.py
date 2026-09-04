@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.routers import vault, agent
+from app.routers import vault, agent, email
 
 app = FastAPI(title="VaultMail API")
 
 app.include_router(vault.router)
 app.include_router(agent.router)
+app.include_router(email.router)
 
 app.add_middleware(
     CORSMiddleware,
