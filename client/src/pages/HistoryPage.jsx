@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { History, Calendar, User, Mail, Search, Inbox, ArrowUpRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { apiFetch } from '../utils/api';
 
 export default function HistoryPage() {
   const [emails, setEmails] = useState([]);
@@ -13,7 +14,7 @@ export default function HistoryPage() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch('/api/emails/history');
+      const res = await apiFetch('/api/emails/history');
       if (!res.ok) throw new Error('Failed to fetch history');
       const data = await res.json();
       const sorted = data.sort((a, b) => new Date(b.sent_at) - new Date(a.sent_at));
@@ -32,7 +33,8 @@ export default function HistoryPage() {
   );
 
   const formatDate = (dateString) => {
-    const d = new Date(dateString);
+    const utcDateString = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
+    const d = new Date(utcDateString);
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
@@ -43,7 +45,8 @@ export default function HistoryPage() {
   };
 
   const getRelativeTime = (dateString) => {
-    const d = new Date(dateString);
+    const utcDateString = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
+    const d = new Date(utcDateString);
     const now = new Date();
     const diff = Math.floor((now - d) / 1000);
     if (diff < 60) return 'Just now';

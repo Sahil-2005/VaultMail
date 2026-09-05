@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FileText, Loader2, ChevronRight, Search, FolderOpen, Hash } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 export default function VaultBrowser() {
   const [notes, setNotes] = useState([]);
@@ -15,7 +16,7 @@ export default function VaultBrowser() {
 
   const fetchNotes = async () => {
     try {
-      const res = await fetch('/api/vault/notes');
+      const res = await apiFetch('/api/vault/notes');
       const data = await res.json();
       setNotes(data);
     } catch (error) {
@@ -29,7 +30,7 @@ export default function VaultBrowser() {
     setLoadingContent(true);
     setSelectedNote(filename);
     try {
-      const res = await fetch(`/api/vault/notes/${encodeURIComponent(filename)}`);
+      const res = await apiFetch(`/api/vault/notes/${encodeURIComponent(filename)}`);
       const data = await res.json();
       setNoteContent(data);
     } catch (error) {
