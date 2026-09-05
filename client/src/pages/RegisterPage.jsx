@@ -32,7 +32,7 @@ export default function RegisterPage() {
 
       login(data.token, data.user);
       toast.success('Account created successfully!');
-      navigate('/');
+      navigate('/app');
     } catch (err) {
       toast.error(err.message);
     } finally {

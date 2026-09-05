@@ -111,7 +111,7 @@ export default function VaultUpload() {
                 <button onClick={() => { setFile(null); setStatus('idle'); }} className="btn-ghost text-sm">
                   Upload Another
                 </button>
-                <Link to="/compose" className="btn-primary flex items-center gap-2 text-sm !py-2.5">
+                <Link to="/app/compose" className="btn-primary flex items-center gap-2 text-sm !py-2.5">
                   Start Composing <ArrowRight size={16} />
                 </Link>
               </div>

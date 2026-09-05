@@ -31,7 +31,7 @@ export default function LoginPage() {
 
       login(data.token, data.user);
       toast.success('Welcome back!');
-      navigate('/');
+      navigate('/app');
     } catch (err) {
       toast.error(err.message);
     } finally {

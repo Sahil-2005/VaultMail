@@ -7,11 +7,11 @@ export default function Layout() {
   const { user, logout } = useAuth();
   
   const navItems = [
-    { to: "/", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
-    { to: "/upload", icon: <HardDrive size={18} />, label: "Vault Upload" },
-    { to: "/vault", icon: <FolderOpen size={18} />, label: "Vault Browser" },
-    { to: "/compose", icon: <PenLine size={18} />, label: "Compose Email" },
-    { to: "/history", icon: <History size={18} />, label: "Email History" },
+    { to: "/app", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
+    { to: "/app/upload", icon: <HardDrive size={18} />, label: "Vault Upload" },
+    { to: "/app/vault", icon: <FolderOpen size={18} />, label: "Vault Browser" },
+    { to: "/app/compose", icon: <PenLine size={18} />, label: "Compose Email" },
+    { to: "/app/history", icon: <History size={18} />, label: "Email History" },
   ];
 
   return (
@@ -41,7 +41,7 @@ export default function Layout() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === "/"}
+              end={item.to === "/app"}
               className={({ isActive }) =>
                 `group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative overflow-hidden ${
                   isActive

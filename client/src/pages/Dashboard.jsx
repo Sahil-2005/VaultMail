@@ -46,9 +46,9 @@ export default function Dashboard() {
   ];
 
   const quickActions = [
-    { to: "/compose", icon: <PenLine size={20} />, label: "Compose Email", desc: "Draft an AI-powered email" },
-    { to: "/upload", icon: <HardDrive size={20} />, label: "Upload Vault", desc: "Index your Obsidian notes" },
-    { to: "/vault", icon: <FolderOpen size={20} />, label: "Browse Vault", desc: "Explore indexed content" },
+    { to: "/app/compose", icon: <PenLine size={20} />, label: "Compose Email", desc: "Draft an AI-powered email" },
+    { to: "/app/upload", icon: <HardDrive size={20} />, label: "Upload Vault", desc: "Index your Obsidian notes" },
+    { to: "/app/vault", icon: <FolderOpen size={20} />, label: "Browse Vault", desc: "Explore indexed content" },
   ];
 
   return (
@@ -77,7 +77,7 @@ export default function Dashboard() {
           </p>
 
           <div className="flex items-center gap-6">
-            <Link to="/compose" className="btn-primary flex items-center gap-2 group">
+            <Link to="/app/compose" className="btn-primary flex items-center gap-2 group">
               <PenLine size={18} />
               Start Composing
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />

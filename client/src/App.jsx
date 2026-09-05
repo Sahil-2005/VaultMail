@@ -7,6 +7,7 @@ import ComposePage from './pages/ComposePage';
 import HistoryPage from './pages/HistoryPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import LandingPage from './pages/LandingPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const AuthGuard = ({ children }) => {
@@ -28,10 +29,11 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           
-          <Route path="/" element={<AuthGuard><Layout /></AuthGuard>}>
+          <Route path="/app" element={<AuthGuard><Layout /></AuthGuard>}>
             <Route index element={<Dashboard />} />
             <Route path="upload" element={<VaultUpload />} />
             <Route path="vault" element={<VaultBrowser />} />
