@@ -18,10 +18,15 @@ async def send_email(to: str, subject: str, body_html: str, user_id: str):
     msg["Subject"] = subject
     msg.attach(MIMEText(body_html, "html"))
     
-    # Try sending via Gmail SMTP
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(settings.GMAIL_ADDRESS, settings.GMAIL_APP_PASSWORD)
-        server.send_message(msg)
+    import asyncio
+    
+    def _send_sync():
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
+            server.login(settings.GMAIL_ADDRESS, settings.GMAIL_APP_PASSWORD)
+            server.send_message(msg)
+            
+    # Run the blocking SMTP call in a thread to prevent freezing the async event loop
+    await asyncio.to_thread(_send_sync)
         
     message_id = str(uuid.uuid4())
     await _save_to_history(to, subject, message_id, user_id)
