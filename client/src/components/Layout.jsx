@@ -1,126 +1,110 @@
-import { Outlet, NavLink } from 'react-router-dom';
-import { Mail, HardDrive, FolderOpen, LayoutDashboard, PenLine, History, Sparkles, LogOut } from 'lucide-react';
+import { Outlet, NavLink, Link } from 'react-router-dom';
+import { LayoutDashboard, HardDrive, FolderOpen, PenLine, History, LogOut } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
+const navItems = [
+  { to: '/app', icon: <LayoutDashboard size={16} />, label: 'Dashboard', end: true },
+  { to: '/app/upload', icon: <HardDrive size={16} />, label: 'Vault Upload' },
+  { to: '/app/vault', icon: <FolderOpen size={16} />, label: 'Vault Browser' },
+  { to: '/app/compose', icon: <PenLine size={16} />, label: 'Compose' },
+  { to: '/app/history', icon: <History size={16} />, label: 'History' },
+];
+
 export default function Layout() {
   const { user, logout } = useAuth();
-  
-  const navItems = [
-    { to: "/", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
-    { to: "/upload", icon: <HardDrive size={18} />, label: "Vault Upload" },
-    { to: "/vault", icon: <FolderOpen size={18} />, label: "Vault Browser" },
-    { to: "/compose", icon: <PenLine size={18} />, label: "Compose Email" },
-    { to: "/history", icon: <History size={18} />, label: "Email History" },
-  ];
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-72 flex flex-col z-20 relative border-r border-white/[0.04]" style={{
-        background: 'linear-gradient(180deg, rgba(10, 15, 30, 0.95), rgba(3, 7, 18, 0.98))',
-        backdropFilter: 'blur(40px)',
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-root)' }}>
+
+      {/* ── SIDEBAR ── */}
+      <aside className="w-60 flex flex-col shrink-0" style={{
+        background: 'var(--bg-panel)',
+        borderRight: '1px solid var(--border)',
       }}>
-        {/* Logo */}
-        <div className="p-6 pb-8 flex items-center gap-3.5">
-          <div className="relative">
-            <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 p-2.5 rounded-2xl shadow-lg glow-accent">
-              <Mail className="text-white" size={22} />
-            </div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#0a0f1e]" style={{ animation: 'pulse-glow 2s ease-in-out infinite' }} />
+        {/* Brand */}
+        <Link to="/" className="flex items-center gap-2.5 px-5 py-5 no-underline" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div className="w-7 h-7 rounded-md flex items-center justify-center"
+            style={{ background: 'var(--amber)', flexShrink: 0 }}>
+            <span style={{ fontFamily: 'JetBrains Mono', fontWeight: 700, fontSize: 13, color: '#0c0a09' }}>V</span>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-gradient tracking-tight">VaultMail</h1>
-            <p className="text-[10px] text-slate-500 font-medium tracking-widest uppercase">AI Email Agent</p>
-          </div>
+          <span style={{ fontFamily: 'JetBrains Mono', fontWeight: 700, fontSize: 14, color: 'var(--text-1)' }}>
+            Vault<span style={{ color: 'var(--amber)' }}>Mail</span>
+          </span>
+        </Link>
+
+        {/* Nav section label */}
+        <div className="px-5 pt-5 pb-2">
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: 10, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            Navigation
+          </span>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-4 space-y-1">
+        {/* Nav links */}
+        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === "/"}
-              className={({ isActive }) =>
-                `group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative overflow-hidden ${
-                  isActive
-                    ? "text-white"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]"
-                }`
-              }
+              end={item.end}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <div className="absolute inset-0 rounded-xl" style={{
-                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08))',
-                      border: '1px solid rgba(129, 140, 248, 0.15)',
-                      boxShadow: '0 0 20px -8px rgba(129, 140, 248, 0.2) inset',
-                    }} />
-                  )}
-                  <span className={`relative z-10 transition-colors ${isActive ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300'}`}>
-                    {item.icon}
-                  </span>
-                  <span className="relative z-10 font-medium text-sm">{item.label}</span>
-                  {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-400 rounded-full" />
-                  )}
-                </>
-              )}
+              {item.icon}
+              {item.label}
             </NavLink>
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 mx-4 mb-4 rounded-xl border border-white/[0.04] bg-white/[0.02]">
-          <div className="flex items-center justify-between gap-2 mb-3 pb-3 border-b border-white/[0.04]">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-              <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+        {/* User strip */}
+        <div className="p-3" style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--bg-hover)' }}>
+            {/* Avatar */}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: 'var(--amber-dim)', border: '1px solid var(--amber-border)' }}>
+              <span style={{ fontFamily: 'JetBrains Mono', fontWeight: 700, fontSize: 12, color: 'var(--amber)' }}>
+                {user?.name?.[0]?.toUpperCase() ?? 'U'}
+              </span>
             </div>
-            <button onClick={logout} className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-white/[0.04] transition-colors" title="Logout">
-              <LogOut size={16} />
+            <div className="flex-1 min-w-0">
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user?.name}
+              </p>
+              <p style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user?.email}
+              </p>
+            </div>
+            <button onClick={logout} title="Sign out"
+              className="btn btn-ghost" style={{ padding: '6px', borderRadius: '6px', flexShrink: 0 }}>
+              <LogOut size={14} style={{ color: 'var(--text-3)' }} />
             </button>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Sparkles size={12} className="text-indigo-400/60" />
-            <span>Powered by Gemini AI</span>
           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto relative" style={{ background: 'var(--bg-main)' }}>
-        {/* Ambient glow orbs */}
-        <div className="fixed top-0 right-0 w-[900px] h-[900px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3"
-          style={{ background: 'radial-gradient(circle, rgba(99, 102, 241, 0.06), transparent 70%)' }}
-        />
-        <div className="fixed bottom-0 left-64 w-[700px] h-[700px] rounded-full pointer-events-none translate-y-1/3"
-          style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.04), transparent 70%)' }}
-        />
+      {/* ── MAIN ── */}
+      <main className="flex-1 overflow-y-auto flex flex-col" style={{ background: 'var(--bg-root)' }}>
+        {/* Top line decoration */}
+        <div style={{ height: 2, background: 'linear-gradient(90deg, var(--amber) 0%, var(--teal) 60%, transparent 100%)', flexShrink: 0 }} />
 
-        <div className="p-8 lg:p-10 max-w-6xl mx-auto min-h-full flex flex-col relative z-0">
+        <div className="flex-1 p-8 max-w-5xl mx-auto w-full">
           <Outlet />
         </div>
       </main>
 
-      <Toaster 
-        position="bottom-right" 
+      <Toaster
+        position="bottom-right"
         toastOptions={{
           style: {
-            background: 'rgba(15, 23, 42, 0.95)',
-            backdropFilter: 'blur(20px)',
-            color: '#f1f5f9',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: '16px',
-            padding: '14px 20px',
-            boxShadow: '0 8px 32px -4px rgba(0,0,0,0.5)',
-            fontFamily: 'Outfit, system-ui, sans-serif',
-            fontSize: '14px',
+            background: 'var(--bg-elevated)',
+            color: 'var(--text-1)',
+            border: '1px solid var(--border)',
+            borderRadius: 12,
+            fontSize: 14,
+            fontFamily: 'Inter, sans-serif',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
           },
-          success: { iconTheme: { primary: '#34d399', secondary: '#030712' } },
-          error: { iconTheme: { primary: '#f87171', secondary: '#030712' } },
+          success: { iconTheme: { primary: 'var(--teal)', secondary: 'var(--bg-root)' } },
+          error: { iconTheme: { primary: 'var(--danger)', secondary: 'var(--bg-root)' } },
         }}
       />
     </div>

@@ -2,48 +2,46 @@ import ReactMarkdown from 'react-markdown';
 import { BookOpen, FileText } from 'lucide-react';
 
 export default function SourcePanel({ sources }) {
-  if (!sources || sources.length === 0) {
-    return (
-      <div className="flex flex-col h-full">
-        <h2 className="text-sm font-semibold text-slate-400 flex items-center gap-2 mb-4 uppercase tracking-wider">
-          <BookOpen size={14} className="text-indigo-400" />
-          Sources Used
-        </h2>
-        <div className="flex-1 flex flex-col items-center justify-center text-slate-600">
-          <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-3">
-            <FileText size={18} />
-          </div>
-          <p className="text-xs text-center">No sources cited for this draft.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <h2 className="text-sm font-semibold text-slate-400 flex items-center gap-2 mb-4 shrink-0 uppercase tracking-wider">
-        <BookOpen size={14} className="text-indigo-400" />
-        Sources Used
-        <span className="ml-auto text-xs font-mono text-slate-600 bg-white/[0.04] px-2 py-0.5 rounded-full">{sources.length}</span>
-      </h2>
-
-      <div className="flex-1 overflow-y-auto pr-1 space-y-3">
-        {sources.map((source, index) => (
-          <div key={index} className="rounded-xl p-4 border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-colors group">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="text-sm font-medium text-indigo-300 group-hover:text-indigo-200 transition-colors leading-tight">
-                {source.title || source.file || 'Unknown Note'}
-              </h3>
-              <span className="text-[10px] text-slate-600 px-2 py-0.5 bg-white/[0.04] rounded-full shrink-0 font-mono">
-                #{index + 1}
-              </span>
-            </div>
-            <div className="text-xs text-slate-400 leading-relaxed prose prose-invert prose-p:my-1 prose-headings:my-2 prose-sm max-w-none">
-              <ReactMarkdown>{source.excerpt || source.text || ''}</ReactMarkdown>
-            </div>
-          </div>
-        ))}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14, flexShrink: 0 }}>
+        <BookOpen size={13} style={{ color: 'var(--amber)' }} />
+        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', fontFamily: 'JetBrains Mono', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          Sources
+        </span>
+        {sources?.length > 0 && (
+          <span style={{ marginLeft: 'auto', fontFamily: 'JetBrains Mono', fontSize: 10, color: 'var(--amber)', background: 'var(--amber-dim)', border: '1px solid var(--amber-border)', padding: '1px 8px', borderRadius: 99 }}>
+            {sources.length}
+          </span>
+        )}
       </div>
+
+      {/* Content */}
+      {!sources || sources.length === 0 ? (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', textAlign: 'center', gap: 10 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--bg-hover)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <FileText size={16} />
+          </div>
+          <p style={{ fontSize: 12 }}>No sources cited</p>
+        </div>
+      ) : (
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingRight: 2 }}>
+          {sources.map((s, i) => (
+            <div key={i} style={{ borderRadius: 10, border: '1px solid var(--border)', padding: '12px 14px', background: 'rgba(0,0,0,0.15)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: 10, color: 'var(--amber)' }}>#{i + 1}</span>
+                <h3 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {s.title || s.file || 'Unknown note'}
+                </h3>
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-2)', lineHeight: 1.6 }}>
+                <ReactMarkdown>{s.excerpt || s.text || ''}</ReactMarkdown>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
