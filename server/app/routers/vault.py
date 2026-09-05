@@ -1,13 +1,15 @@
 import os
 import shutil
-from fastapi import APIRouter, UploadFile, File, HTTPException
+import uuid
+import tempfile
+from datetime import datetime
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from pydantic import BaseModel
 from app.services.vault_service import process_vault_zip
+from app.services.database import db
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/api/vault", tags=["vault"])
-
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 class UploadResponse(BaseModel):
     status: str
@@ -15,65 +17,97 @@ class UploadResponse(BaseModel):
     num_chunks: int
 
 @router.post("/upload", response_model=UploadResponse)
-async def upload_vault(file: UploadFile = File(...)):
+async def upload_vault(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     if not file.filename.endswith('.zip'):
         raise HTTPException(status_code=400, detail="Only .zip files are supported")
     
-    if os.path.exists(UPLOAD_DIR):
-        shutil.rmtree(UPLOAD_DIR)
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    user_id = current_user["id"]
+    new_vault_id = str(uuid.uuid4())
     
-    zip_path = os.path.join(UPLOAD_DIR, "vault.zip")
-    extract_to = os.path.join(UPLOAD_DIR, "extracted")
-    
-    with open(zip_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    try:
-        result = process_vault_zip(zip_path, extract_to)
-        return {
-            "status": "success",
-            "num_files": result["num_files"],
-            "num_chunks": result["num_chunks"]
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    with tempfile.TemporaryDirectory() as temp_dir:
+        zip_path = os.path.join(temp_dir, "vault.zip")
+        extract_to = os.path.join(temp_dir, "extracted")
+        
+        with open(zip_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        try:
+            # Process the new vault (this also deletes old qdrant points for the user)
+            result = process_vault_zip(zip_path, extract_to, user_id, new_vault_id)
+            
+            file_docs = result.get("file_docs", [])
+            
+            # Save vault metadata to MongoDB
+            await db.vaults.update_one(
+                {"user_id": user_id},
+                {"$set": {
+                    "vault_id": new_vault_id,
+                    "name": file.filename,
+                    "num_files": result["num_files"],
+                    "num_chunks": result["num_chunks"],
+                    "uploaded_at": datetime.utcnow().isoformat() + "Z"
+                }},
+                upsert=True
+            )
+            
+            # Replace old vault files with new ones in MongoDB
+            await db.vault_files.delete_many({"user_id": user_id})
+            if file_docs:
+                await db.vault_files.insert_many(file_docs)
+                
+            return {
+                "status": "success",
+                "num_files": result["num_files"],
+                "num_chunks": result["num_chunks"]
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/notes")
-async def list_notes():
-    extract_to = os.path.join(UPLOAD_DIR, "extracted")
+async def list_notes(current_user: dict = Depends(get_current_user)):
+    user_id = current_user["id"]
+    vault_meta = await db.vaults.find_one({"user_id": user_id})
     notes = []
-    if not os.path.exists(extract_to):
+    
+    if not vault_meta:
         return notes
         
-    for root, _, files in os.walk(extract_to):
-        for file in files:
-            if file.endswith(".md"):
-                rel_path = os.path.relpath(os.path.join(root, file), extract_to)
-                # Keep it simple for now, just returning titles and paths
-                notes.append({
-                    "title": file.replace(".md", ""),
-                    "filename": rel_path.replace("\\", "/")
-                })
+    vault_id = vault_meta["vault_id"]
+    
+    # Query MongoDB instead of traversing filesystem
+    cursor = db.vault_files.find(
+        {"user_id": user_id, "vault_id": vault_id},
+        {"title": 1, "filename": 1, "_id": 0}
+    )
+    
+    async for doc in cursor:
+        notes.append({
+            "title": doc["title"],
+            "filename": doc["filename"]
+        })
+        
     return notes
 
 @router.get("/notes/{filename:path}")
-async def get_note(filename: str):
-    extract_to = os.path.join(UPLOAD_DIR, "extracted")
-    filepath = os.path.join(extract_to, filename)
-    
-    # Basic security check
-    if not os.path.abspath(filepath).startswith(os.path.abspath(extract_to)):
-        raise HTTPException(status_code=403, detail="Invalid path")
+async def get_note(filename: str, current_user: dict = Depends(get_current_user)):
+    user_id = current_user["id"]
+    vault_meta = await db.vaults.find_one({"user_id": user_id})
+    if not vault_meta:
+        raise HTTPException(status_code=404, detail="No active vault found")
         
-    if not os.path.exists(filepath):
+    vault_id = vault_meta["vault_id"]
+    
+    # Query MongoDB for the file content
+    file_doc = await db.vault_files.find_one({
+        "user_id": user_id, 
+        "vault_id": vault_id, 
+        "filename": filename
+    })
+    
+    if not file_doc:
         raise HTTPException(status_code=404, detail="Note not found")
         
-    with open(filepath, "r", encoding="utf-8") as f:
-        content = f.read()
-        
     return {
-        "title": os.path.basename(filename).replace(".md", ""),
-        "content": content
+        "title": file_doc["title"],
+        "content": file_doc["content"]
     }
-

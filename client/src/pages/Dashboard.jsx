@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PenLine, FolderOpen, HardDrive, ArrowRight, Sparkles, Shield, Zap, Brain, FileText, Mail } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ notes: 0, emails: 0 });
@@ -9,8 +10,8 @@ export default function Dashboard() {
     const fetchStats = async () => {
       try {
         const [notesRes, historyRes] = await Promise.all([
-          fetch('/api/vault/notes'),
-          fetch('/api/emails/history'),
+          apiFetch('/api/vault/notes'),
+          apiFetch('/api/emails/history'),
         ]);
         const notes = await notesRes.json();
         const history = await historyRes.json();

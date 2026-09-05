@@ -50,14 +50,14 @@ def _parse_json_response(text: str) -> dict:
     return {"subject": "Draft Email", "body": text, "sources": []}
 
 
-async def generate_email_draft(prompt: str, to_email: str = "") -> dict:
+async def generate_email_draft(prompt: str, to_email: str, user_id: str, vault_id: str) -> dict:
     """
     Two-step RAG pipeline (no Gemini function-calling):
       1. We run the semantic search ourselves.
       2. We inject the results as context into a single Gemini prompt.
     """
     # --- Step 1: Retrieve relevant chunks from Qdrant (local, fast) ---
-    chunks = search_vault_chunks(prompt, limit=5)
+    chunks = search_vault_chunks(prompt, user_id, vault_id, limit=5)
 
     if chunks:
         context_parts = []
@@ -80,7 +80,7 @@ async def generate_email_draft(prompt: str, to_email: str = "") -> dict:
 
     # No tools=[] here — plain text generation, fast and reliable
     model = genai.GenerativeModel(
-        model_name="gemini-3.5-flash",
+        model_name="gemini-3.6-flash",
         system_instruction=SYSTEM_PROMPT,
     )
 

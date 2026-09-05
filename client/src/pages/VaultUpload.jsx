@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Upload, FileArchive, CheckCircle2, AlertCircle, Loader2, Sparkles, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { apiFetch } from '../utils/api';
 
 export default function VaultUpload() {
   const [file, setFile] = useState(null);
@@ -45,7 +46,7 @@ export default function VaultUpload() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/api/vault/upload', {
+      const response = await apiFetch('/api/vault/upload', {
         method: 'POST',
         body: formData,
       });

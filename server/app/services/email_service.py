@@ -1,15 +1,12 @@
-import os
-import json
-import uuid
 import smtplib
+import uuid
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from app.config import settings
+from app.services.database import db
 
-HISTORY_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "email_history.json")
-
-def send_email(to: str, subject: str, body_html: str):
+async def send_email(to: str, subject: str, body_html: str, user_id: str):
     if not to or not to.strip():
         raise ValueError("Recipient address cannot be empty")
     if not settings.GMAIL_ADDRESS or not settings.GMAIL_APP_PASSWORD or settings.GMAIL_ADDRESS == "your_email@gmail.com":
@@ -27,34 +24,24 @@ def send_email(to: str, subject: str, body_html: str):
         server.send_message(msg)
         
     message_id = str(uuid.uuid4())
-    _save_to_history(to, subject, message_id)
+    await _save_to_history(to, subject, message_id, user_id)
     return message_id
 
-def _save_to_history(to: str, subject: str, message_id: str):
-    history = []
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, "r") as f:
-                history = json.load(f)
-        except json.JSONDecodeError:
-            pass
-            
-    history.append({
+async def _save_to_history(to: str, subject: str, message_id: str, user_id: str):
+    log_doc = {
+        "user_id": user_id,
         "message_id": message_id,
         "to": to,
         "subject": subject,
-        "sent_at": datetime.now().isoformat()
-    })
-    
-    os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(history, f, indent=2)
+        "sent_at": datetime.utcnow().isoformat() + "Z"
+    }
+    await db.email_logs.insert_one(log_doc)
 
-def get_email_history():
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, "r") as f:
-                return json.load(f)
-        except json.JSONDecodeError:
-            pass
-    return []
+async def get_email_history(user_id: str):
+    cursor = db.email_logs.find({"user_id": user_id})
+    # sort by sent_at descending
+    history = []
+    async for doc in cursor:
+        doc["_id"] = str(doc["_id"])  # convert ObjectId to string for JSON serialization
+        history.append(doc)
+    return history

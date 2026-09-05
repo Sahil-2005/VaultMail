@@ -1,8 +1,11 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Mail, HardDrive, FolderOpen, LayoutDashboard, PenLine, History, Sparkles } from 'lucide-react';
+import { Mail, HardDrive, FolderOpen, LayoutDashboard, PenLine, History, Sparkles, LogOut } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 export default function Layout() {
+  const { user, logout } = useAuth();
+  
   const navItems = [
     { to: "/", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
     { to: "/upload", icon: <HardDrive size={18} />, label: "Vault Upload" },
@@ -71,6 +74,15 @@ export default function Layout() {
 
         {/* Footer */}
         <div className="p-4 mx-4 mb-4 rounded-xl border border-white/[0.04] bg-white/[0.02]">
+          <div className="flex items-center justify-between gap-2 mb-3 pb-3 border-b border-white/[0.04]">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+              <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+            </div>
+            <button onClick={logout} className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-white/[0.04] transition-colors" title="Logout">
+              <LogOut size={16} />
+            </button>
+          </div>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <Sparkles size={12} className="text-indigo-400/60" />
             <span>Powered by Gemini AI</span>
