@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Database, Cpu, Send, ExternalLink } from 'lucide-react';
+import vaultMailVideo from '../assets/vaultMail.mp4';
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuth();
@@ -91,38 +92,40 @@ export default function LandingPage() {
           </Link>
         </div>
 
-        {/* ── TERMINAL MOCKUP ── */}
-        <div className="page-enter mt-20 w-full max-w-3xl text-left" style={{ animationDelay: '0.3s' }}>
-          <div className="panel" style={{ overflow: 'hidden', border: '1px solid rgba(245,158,11,0.15)', boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,158,11,0.08) inset' }}>
+        {/* ── DEMO VIDEO ── */}
+        <div className="page-enter mt-20 w-full max-w-4xl text-left flex flex-col items-center" style={{ animationDelay: '0.3s' }}>
+          <div className="panel w-full" style={{ overflow: 'hidden', border: '1px solid rgba(245,158,11,0.15)', boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,158,11,0.08) inset' }}>
             {/* Window chrome */}
             <div className="flex items-center gap-2 px-5 py-3.5" style={{ borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.3)' }}>
               <div className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
               <div className="w-3 h-3 rounded-full" style={{ background: '#febc2e' }} />
               <div className="w-3 h-3 rounded-full" style={{ background: '#28c840' }} />
-              <span className="ml-4" style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--text-3)' }}>vaultmail ~ agent.log</span>
+              <span className="ml-4" style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--text-3)' }}>vaultmail ~ demo.mp4</span>
             </div>
-            {/* Terminal content */}
-            <div className="p-6 space-y-3" style={{ fontFamily: 'JetBrains Mono', fontSize: 13, lineHeight: 1.8 }}>
-              <TerminalLine ln="01" color="var(--text-3)" text="$ vaultmail upload --path ./obsidian-vault.zip" />
-              <TerminalLine ln="02" color="var(--teal)" text="✓  Parsed 47 Markdown files" />
-              <TerminalLine ln="03" color="var(--teal)" text="✓  Generated 312 Gemini embeddings" />
-              <TerminalLine ln="04" color="var(--teal)" text="✓  Indexed into Qdrant collection [vault_notes]" />
-              <TerminalLine ln="05" color="var(--text-3)" text="" />
-              <TerminalLine ln="06" color="var(--text-3)" text='$ vaultmail draft --to "alice@acme.com" --about "Q3 roadmap update"' />
-              <TerminalLine ln="07" color="var(--amber)" text='⚡ Searching vault for: "Q3 roadmap update"' />
-              <TerminalLine ln="08" color="var(--amber)" text='   Retrieved 5 relevant chunks (score ≥ 0.82)' />
-              <TerminalLine ln="09" color="var(--teal)" text="✓  Draft ready — 3 notes cited" />
-              <div className="flex items-center gap-2 mt-1">
-                <span className="ln">10</span>
-                <span style={{ color: 'var(--text-1)' }}>Subject: Q3 Roadmap — Key Milestones & Owners</span>
-                <span style={{
-                  display: 'inline-block', width: 2, height: 16, marginLeft: 2,
-                  background: 'var(--amber)', animation: 'pulse-amber 1.2s ease infinite',
-                  borderRadius: 1,
-                }} />
-              </div>
+            {/* Video content */}
+            <div className="w-full bg-black relative" style={{ aspectRatio: '16/9' }}>
+              <video 
+                src={vaultMailVideo} 
+                controls 
+                autoPlay 
+                muted 
+                loop 
+                className="w-full h-full object-contain"
+                style={{ outline: 'none' }}
+              />
             </div>
           </div>
+          
+          <a 
+            href="https://drive.google.com/file/d/11IMnpzwm5-K33-BbU5KVS3l5i-AoKTx4/view?usp=sharing" 
+            target="_blank" 
+            rel="noreferrer"
+            className="mt-6 flex items-center gap-2 text-sm text-gray-400 hover:text-amber-500 transition-colors"
+            style={{ fontFamily: 'JetBrains Mono' }}
+          >
+            <ExternalLink size={14} />
+            Watch in high quality on Google Drive
+          </a>
         </div>
       </main>
 
@@ -168,15 +171,6 @@ export default function LandingPage() {
           Obsidian × Gemini × Qdrant
         </span>
       </footer>
-    </div>
-  );
-}
-
-function TerminalLine({ ln, color, text }) {
-  return (
-    <div className="flex items-start gap-4">
-      <span className="ln" style={{ paddingTop: 1 }}>{ln}</span>
-      <span style={{ color, flex: 1 }}>{text}</span>
     </div>
   );
 }
