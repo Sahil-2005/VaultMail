@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Sparkles } from 'lucide-react';
+import { Sparkles, Send } from 'lucide-react';
 
 export default function ComposeForm({ onGenerate, isLoading }) {
   const [to, setTo] = useState('');
@@ -12,40 +12,50 @@ export default function ComposeForm({ onGenerate, isLoading }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-300">Recipient (Optional)</label>
-        <input 
-          type="email" 
+        <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+          <Send size={14} className="text-slate-500" />
+          Recipient
+          <span className="text-slate-600 text-xs font-normal">(optional)</span>
+        </label>
+        <input
+          type="email"
           value={to}
           onChange={(e) => setTo(e.target.value)}
           placeholder="colleague@example.com"
-          className="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
-      
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-300">What should the email be about?</label>
-        <textarea 
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Draft an email to Alice summarizing the key points from the Q3 Roadmap note..."
-          rows={4}
-          className="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
-          required
+          className="input-premium"
         />
       </div>
 
-      <div className="flex justify-end mt-2">
-        <button 
-          type="submit" 
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+          <Sparkles size={14} className="text-indigo-400" />
+          What should the email be about?
+        </label>
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="Draft an email to Alice summarizing the key milestones from the Q3 Roadmap, and mention who is leading each initiative..."
+          rows={5}
+          className="input-premium resize-none leading-relaxed"
+          required
+        />
+        <p className="text-xs text-slate-600 mt-1">
+          The AI will search your vault for relevant context before drafting.
+        </p>
+      </div>
+
+      <div className="flex justify-end mt-1">
+        <button
+          type="submit"
           disabled={isLoading || !prompt.trim()}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary flex items-center gap-2.5 group"
         >
           {isLoading ? (
-            <div className="animate-spin h-5 w-5 border-2 border-white/20 border-t-white rounded-full" />
+            <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
           ) : (
-            <Sparkles size={18} />
+            <Sparkles size={18} className="group-hover:rotate-12 transition-transform" />
           )}
           {isLoading ? 'Generating Draft...' : 'Generate Draft'}
         </button>
