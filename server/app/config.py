@@ -10,5 +10,7 @@ class Settings:
     QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
     QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
     FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    MONGODB_URI = os.getenv("MONGODB_URI", "")
+    JWT_SECRET = os.getenv("JWT_SECRET", "your-default-secret-here")
 
 settings = Settings()

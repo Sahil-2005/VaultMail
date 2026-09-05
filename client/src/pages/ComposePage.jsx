@@ -5,6 +5,7 @@ import SourcePanel from '../components/email/SourcePanel';
 import ApproveButton from '../components/email/ApproveButton';
 import toast from 'react-hot-toast';
 import { PenLine, ArrowLeft } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 export default function ComposePage() {
   const [draft, setDraft] = useState(null);
@@ -15,12 +16,14 @@ export default function ComposePage() {
   const handleGenerateDraft = async ({ prompt, to }) => {
     setIsGenerating(true);
     try {
-      const res = await fetch('/api/draft-email', {
+      const res = await apiFetch('/api/draft-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, to_email: to })
       });
-      if (!res.ok) throw new Error('Failed to generate draft');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to generate draft');
+      }
       const data = await res.json();
       setDraft(data.draft);
       setSources(data.sources);
@@ -36,9 +39,8 @@ export default function ComposePage() {
     if (!draft) return;
     setIsSending(true);
     try {
-      const res = await fetch('/api/emails/send', {
+      const res = await apiFetch('/api/emails/send', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           to: draft.to,
           subject: draft.subject,
