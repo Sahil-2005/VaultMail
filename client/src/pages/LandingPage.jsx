@@ -1,122 +1,201 @@
 import { Link } from 'react-router-dom';
-import { Mail, Brain, Zap, ArrowRight, Shield, Database } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { ArrowRight, Database, Cpu, Send, ExternalLink } from 'lucide-react';
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: 'var(--bg-main)' }}>
-      {/* Background Orbs */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3"
-        style={{ background: 'radial-gradient(circle, rgba(99, 102, 241, 0.08), transparent 70%)' }} />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] rounded-full pointer-events-none translate-y-1/3 -translate-x-1/3"
-        style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.08), transparent 70%)' }} />
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-root)' }}>
+      {/* ── NOISE TEXTURE OVERLAY ── */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.015]"
+        style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")" }}
+      />
 
-      {/* Navigation Bar */}
-      <nav className="relative z-10 p-6 flex justify-between items-center max-w-7xl w-full mx-auto">
+      {/* ── AMBER HALO ── */}
+      <div className="fixed top-[-20%] left-[10%] w-[700px] h-[700px] rounded-full pointer-events-none z-0"
+        style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 65%)' }} />
+
+      {/* ── TEAL HALO ── */}
+      <div className="fixed bottom-[-10%] right-[5%] w-[500px] h-[500px] rounded-full pointer-events-none z-0"
+        style={{ background: 'radial-gradient(circle, rgba(45,212,191,0.04) 0%, transparent 65%)' }} />
+
+      {/* ── NAV ── */}
+      <nav className="relative z-10 flex items-center justify-between px-8 py-5 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 p-2.5 rounded-2xl shadow-lg glow-accent">
-            <Mail className="text-white" size={24} />
+          {/* Logo mark — stylized V with circuit line */}
+          <div className="relative w-9 h-9 flex items-center justify-center rounded-lg"
+            style={{ background: 'var(--amber)', boxShadow: '0 0 20px rgba(245,158,11,0.4)' }}>
+            <span style={{ fontFamily: 'JetBrains Mono', fontWeight: 700, fontSize: 16, color: '#0c0a09' }}>V</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gradient tracking-tight">VaultMail</h1>
-            <p className="text-[10px] text-slate-500 font-medium tracking-widest uppercase">AI Email Agent</p>
+            <span style={{ fontFamily: 'JetBrains Mono', fontWeight: 700, fontSize: 16, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>
+              Vault<span style={{ color: 'var(--amber)' }}>Mail</span>
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+
+        <div className="flex items-center gap-3">
+          <a href="https://github.com/Sahil-2005/VaultMail" target="_blank" rel="noreferrer"
+            className="btn btn-ghost" style={{ padding: '8px', borderRadius: '8px' }}>
+            <ExternalLink size={18} style={{ color: 'var(--text-3)' }} />
+          </a>
           {isAuthenticated ? (
-            <Link to="/app" className="btn-primary py-2 px-5 text-sm flex items-center gap-2">
-              Go to Dashboard <ArrowRight size={16} />
+            <Link to="/app" className="btn btn-amber" style={{ gap: 6 }}>
+              Open Dashboard <ArrowRight size={15} />
             </Link>
           ) : (
             <>
-              <Link to="/login" className="btn-ghost">Sign In</Link>
-              <Link to="/register" className="btn-primary py-2 px-5 text-sm flex items-center gap-2">
-                Get Started <ArrowRight size={16} />
-              </Link>
+              <Link to="/login" className="btn btn-ghost" style={{ fontSize: 14 }}>Sign In</Link>
+              <Link to="/register" className="btn btn-amber">Get started free</Link>
             </>
           )}
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="flex-1 flex flex-col justify-center items-center text-center px-4 relative z-10 mt-16 lg:mt-0">
-        <div className="page-enter max-w-4xl mx-auto flex flex-col items-center">
-          <div className="badge mb-8 glow-accent border-indigo-500/30 text-indigo-300">
-            <SparkleIcon />
-            <span>Powered by Gemini AI + Qdrant</span>
-          </div>
-          
-          <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-tight">
-            Draft Emails perfectly from your <span className="text-gradient">Obsidian Vault</span>
-          </h1>
-          
-          <p className="text-lg lg:text-xl text-slate-400 mb-10 max-w-2xl font-light">
-            Upload your Obsidian Knowledge Base. VaultMail uses Advanced RAG to understand your notes and drafts hyper-personalized emails mimicking your exact tone and context.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-            <Link to={isAuthenticated ? "/app" : "/register"} className="btn-primary text-lg px-8 py-4 w-full sm:w-auto flex justify-center items-center gap-3 group">
-              {isAuthenticated ? "Go to Dashboard" : "Start Drafting for Free"}
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+      {/* ── HERO ── */}
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-16 pb-24">
+        {/* Inline terminal tag */}
+        <div className="pill mb-8" style={{ animation: 'page-in 0.5s ease forwards' }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--amber)', display: 'inline-block', animation: 'pulse-amber 2s ease infinite' }} />
+          Gemini RAG · Qdrant · Obsidian
+        </div>
+
+        <h1 className="page-enter" style={{
+          fontFamily: 'Inter', fontWeight: 900,
+          fontSize: 'clamp(40px, 7vw, 88px)',
+          lineHeight: 1.04, letterSpacing: '-0.04em',
+          color: 'var(--text-1)', maxWidth: 900,
+          marginBottom: 24,
+        }}>
+          Your Vault.<br />
+          <span className="text-amber-gradient">Your Emails. </span>
+          Your AI.
+        </h1>
+
+        <p className="page-enter" style={{
+          fontSize: 18, color: 'var(--text-2)', maxWidth: 560,
+          lineHeight: 1.6, marginBottom: 40,
+          animationDelay: '0.1s',
+        }}>
+          Upload your Obsidian knowledge base. VaultMail uses advanced RAG to search your notes and drafts precision emails grounded in your own words.
+        </p>
+
+        <div className="flex items-center gap-4 page-enter" style={{ animationDelay: '0.2s' }}>
+          <Link to={isAuthenticated ? '/app' : '/register'}
+            className="btn btn-amber" style={{ fontSize: 16, padding: '13px 28px' }}>
+            {isAuthenticated ? 'Dashboard' : 'Start for free'} <ArrowRight size={16} />
+          </Link>
+          <Link to="/login" className="btn btn-outline" style={{ fontSize: 16, padding: '13px 28px' }}>
+            Sign in
+          </Link>
+        </div>
+
+        {/* ── TERMINAL MOCKUP ── */}
+        <div className="page-enter mt-20 w-full max-w-3xl text-left" style={{ animationDelay: '0.3s' }}>
+          <div className="panel" style={{ overflow: 'hidden', border: '1px solid rgba(245,158,11,0.15)', boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,158,11,0.08) inset' }}>
+            {/* Window chrome */}
+            <div className="flex items-center gap-2 px-5 py-3.5" style={{ borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.3)' }}>
+              <div className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
+              <div className="w-3 h-3 rounded-full" style={{ background: '#febc2e' }} />
+              <div className="w-3 h-3 rounded-full" style={{ background: '#28c840' }} />
+              <span className="ml-4" style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--text-3)' }}>vaultmail ~ agent.log</span>
+            </div>
+            {/* Terminal content */}
+            <div className="p-6 space-y-3" style={{ fontFamily: 'JetBrains Mono', fontSize: 13, lineHeight: 1.8 }}>
+              <TerminalLine ln="01" color="var(--text-3)" text="$ vaultmail upload --path ./obsidian-vault.zip" />
+              <TerminalLine ln="02" color="var(--teal)" text="✓  Parsed 47 Markdown files" />
+              <TerminalLine ln="03" color="var(--teal)" text="✓  Generated 312 Gemini embeddings" />
+              <TerminalLine ln="04" color="var(--teal)" text="✓  Indexed into Qdrant collection [vault_notes]" />
+              <TerminalLine ln="05" color="var(--text-3)" text="" />
+              <TerminalLine ln="06" color="var(--text-3)" text='$ vaultmail draft --to "alice@acme.com" --about "Q3 roadmap update"' />
+              <TerminalLine ln="07" color="var(--amber)" text='⚡ Searching vault for: "Q3 roadmap update"' />
+              <TerminalLine ln="08" color="var(--amber)" text='   Retrieved 5 relevant chunks (score ≥ 0.82)' />
+              <TerminalLine ln="09" color="var(--teal)" text="✓  Draft ready — 3 notes cited" />
+              <div className="flex items-center gap-2 mt-1">
+                <span className="ln">10</span>
+                <span style={{ color: 'var(--text-1)' }}>Subject: Q3 Roadmap — Key Milestones & Owners</span>
+                <span style={{
+                  display: 'inline-block', width: 2, height: 16, marginLeft: 2,
+                  background: 'var(--amber)', animation: 'pulse-amber 1.2s ease infinite',
+                  borderRadius: 1,
+                }} />
+              </div>
+            </div>
           </div>
         </div>
       </main>
 
-      {/* Features Section */}
-      <section className="relative z-10 py-24 px-4 mt-12 bg-white/[0.01] border-t border-white/[0.04]">
-        <div className="max-w-7xl mx-auto">
+      {/* ── HOW IT WORKS ── */}
+      <section className="relative z-10 border-t py-24 px-6" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-white mb-4">How it works</h2>
-            <p className="text-slate-400 max-w-xl mx-auto">Upload, Index, and Draft. VaultMail handles the heavy lifting of context retrieval and email generation.</p>
+            <div className="pill pill-teal mx-auto mb-4">How it works</div>
+            <h2 style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-1)' }}>
+              Three steps from notes to inbox.
+            </h2>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <FeatureCard 
-              icon={<Database size={24} className="text-emerald-400" />}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StepCard
+              n="01"
+              icon={<Database size={22} style={{ color: 'var(--amber)' }} />}
               title="Upload your Vault"
-              desc="Just zip your Obsidian vault and upload. We automatically parse markdown, extract metadata, and chunk your knowledge."
+              desc="Zip your entire Obsidian vault. VaultMail parses every .md file, strips frontmatter, and chunks your knowledge automatically."
             />
-            <FeatureCard 
-              icon={<Brain size={24} className="text-purple-400" />}
-              title="Semantic Search (RAG)"
-              desc="Every note is embedded into a high-dimensional Qdrant Vector database using Gemini embeddings for lightning-fast retrieval."
+            <StepCard
+              n="02"
+              icon={<Cpu size={22} style={{ color: 'var(--teal)' }} />}
+              title="Semantic Indexing"
+              desc="Every chunk is embedded via Gemini's text-embedding-001 and stored in Qdrant. Retrieval happens at millisecond speed."
             />
-            <FeatureCard 
-              icon={<Zap size={24} className="text-amber-400" />}
-              title="AI Email Generation"
-              desc="Tell the AI who you are emailing and why. It searches your vault and writes the perfect response via Gemini 1.5 Flash."
+            <StepCard
+              n="03"
+              icon={<Send size={22} style={{ color: 'var(--amber)' }} />}
+              title="AI-drafted Emails"
+              desc="Describe what you want. The RAG pipeline fetches the exact notes, Gemini Flash drafts the email. Review, edit, send."
             />
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/[0.04] py-8 text-center text-slate-500 text-sm">
-        <p>© 2026 VaultMail. Built for productivity.</p>
+      {/* ── FOOTER ── */}
+      <footer className="relative z-10 border-t px-8 py-6 flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+        <span style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--text-3)' }}>
+          VaultMail © 2026
+        </span>
+        <span style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--text-3)' }}>
+          Obsidian × Gemini × Qdrant
+        </span>
       </footer>
     </div>
   );
 }
 
-function SparkleIcon() {
+function TerminalLine({ ln, color, text }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
-    </svg>
+    <div className="flex items-start gap-4">
+      <span className="ln" style={{ paddingTop: 1 }}>{ln}</span>
+      <span style={{ color, flex: 1 }}>{text}</span>
+    </div>
   );
 }
 
-function FeatureCard({ icon, title, desc }) {
+function StepCard({ n, icon, title, desc }) {
   return (
-    <div className="glass-panel glass-panel-hover rounded-3xl p-8 flex flex-col gap-4">
-      <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-        {icon}
+    <div className="panel-elevated p-7 flex flex-col gap-4 group hover:border-amber-500/20 transition-all duration-300"
+      style={{ borderRadius: 16 }}>
+      <div className="flex items-center justify-between">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center"
+          style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+          {icon}
+        </div>
+        <span style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--text-3)', letterSpacing: '0.08em' }}>{n}</span>
       </div>
-      <h3 className="text-xl font-bold text-white">{title}</h3>
-      <p className="text-slate-400 leading-relaxed">{desc}</p>
+      <div>
+        <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-1)', marginBottom: 8, letterSpacing: '-0.02em' }}>{title}</h3>
+        <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6 }}>{desc}</p>
+      </div>
     </div>
   );
 }

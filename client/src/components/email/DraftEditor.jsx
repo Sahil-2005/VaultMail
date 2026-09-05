@@ -2,53 +2,55 @@ import { Mail, Type, AlignLeft } from 'lucide-react';
 
 export default function DraftEditor({ draft, setDraft }) {
   return (
-    <div className="flex flex-col h-full gap-5">
-      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-        <div className="w-2 h-2 bg-indigo-400 rounded-full" style={{ animation: 'pulse-glow 2s ease-in-out infinite' }} />
-        Draft Review
-      </h2>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--amber)', animation: 'pulse-amber 2s ease infinite', flexShrink: 0 }} />
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.01em' }}>Draft Review</span>
+        <span style={{ marginLeft: 'auto', fontFamily: 'JetBrains Mono', fontSize: 10, color: 'var(--text-3)', background: 'var(--bg-hover)', border: '1px solid var(--border)', padding: '2px 8px', borderRadius: 4 }}>
+          editable
+        </span>
+      </div>
 
-      {/* To field */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <Mail size={12} />
-          To
-        </label>
+      <FieldRow icon={<Mail size={12} />} label="To">
         <input
           type="email"
+          className="field"
           value={draft.to || ''}
           onChange={(e) => setDraft({ ...draft, to: e.target.value })}
-          className="input-premium !py-2.5 !text-sm"
           placeholder="recipient@example.com"
+          style={{ fontSize: 13, padding: '8px 12px' }}
         />
-      </div>
+      </FieldRow>
 
-      {/* Subject field */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <Type size={12} />
-          Subject
-        </label>
+      <FieldRow icon={<Type size={12} />} label="Subject">
         <input
           type="text"
+          className="field"
           value={draft.subject || ''}
           onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
-          className="input-premium !py-2.5 !text-sm font-medium"
+          style={{ fontSize: 13, fontWeight: 600, padding: '8px 12px' }}
         />
-      </div>
+      </FieldRow>
 
-      {/* Body field */}
-      <div className="flex flex-col gap-1.5 flex-1">
-        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <AlignLeft size={12} />
-          Message Body
-        </label>
+      <FieldRow icon={<AlignLeft size={12} />} label="Body" grow>
         <textarea
+          className="field"
           value={draft.body || ''}
           onChange={(e) => setDraft({ ...draft, body: e.target.value })}
-          className="input-premium flex-1 resize-none !text-sm leading-relaxed"
+          style={{ flex: 1, resize: 'none', fontSize: 13, lineHeight: 1.65, padding: '10px 12px', fontFamily: 'JetBrains Mono' }}
         />
-      </div>
+      </FieldRow>
+    </div>
+  );
+}
+
+function FieldRow({ icon, label, children, grow }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, flex: grow ? 1 : 'none', minHeight: grow ? 0 : 'auto' }}>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: 'var(--text-3)', fontFamily: 'JetBrains Mono', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        {icon} {label}
+      </label>
+      {children}
     </div>
   );
 }
