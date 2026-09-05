@@ -1,11 +1,13 @@
 import { useState, useRef } from 'react';
-import { Upload, FileArchive, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload, FileArchive, CheckCircle2, AlertCircle, Loader2, Sparkles, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function VaultUpload() {
   const [file, setFile] = useState(null);
-  const [status, setStatus] = useState('idle'); // idle, uploading, success, error
+  const [status, setStatus] = useState('idle');
   const [result, setResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -21,9 +23,23 @@ export default function VaultUpload() {
     }
   };
 
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const selected = e.dataTransfer.files[0];
+      if (!selected.name.endsWith('.zip')) {
+        setStatus('error');
+        setErrorMsg('Please upload a .zip file containing your Obsidian vault.');
+        return;
+      }
+      setFile(selected);
+      setStatus('idle');
+    }
+  };
+
   const handleUpload = async () => {
     if (!file) return;
-    
     setStatus('uploading');
     const formData = new FormData();
     formData.append('file', file);
@@ -33,9 +49,7 @@ export default function VaultUpload() {
         method: 'POST',
         body: formData,
       });
-      
       const data = await response.json();
-      
       if (response.ok) {
         setResult(data);
         setStatus('success');
@@ -49,79 +63,98 @@ export default function VaultUpload() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-3xl mx-auto w-full">
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Upload Vault</h1>
-        <p className="text-slate-400">Zip your Obsidian vault and upload it here to build the knowledge base.</p>
-      </header>
+    <div className="page-enter flex flex-col items-center justify-center min-h-[70vh] max-w-2xl mx-auto w-full">
+      <div className="w-full mb-10 text-center">
+        <h1 className="text-3xl font-bold tracking-tight text-white mb-3">Upload Your Vault</h1>
+        <p className="text-slate-400 text-base">Zip your Obsidian vault and upload it to build your AI knowledge base.</p>
+      </div>
 
-      <div className="glass-panel rounded-3xl p-8 relative overflow-hidden">
-        {/* Glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-indigo-500/5 blur-[100px] pointer-events-none rounded-full"></div>
-        
-        <div 
-          className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 relative z-10 flex flex-col items-center justify-center min-h-[300px] ${
-            file ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-700 hover:border-indigo-500/30 hover:bg-white/5'
+      <div className="w-full glass-panel rounded-3xl p-10 relative overflow-hidden">
+        {/* Ambient glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(99, 102, 241, 0.06), transparent 60%)' }}
+        />
+
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          className={`relative z-10 border-2 border-dashed rounded-2xl p-14 text-center transition-all duration-500 flex flex-col items-center justify-center min-h-[320px] ${
+            isDragging
+              ? 'border-indigo-400/60 bg-indigo-500/[0.06] scale-[1.01]'
+              : file
+                ? 'border-indigo-500/40 bg-indigo-500/[0.03]'
+                : 'border-white/[0.08] hover:border-indigo-400/20 hover:bg-white/[0.02]'
           }`}
         >
           {status === 'success' ? (
-            <div className="flex flex-col items-center text-emerald-400 animate-in zoom-in duration-500">
-              <CheckCircle2 size={64} className="mb-4" />
-              <h3 className="text-2xl font-semibold text-white mb-2">Upload Complete!</h3>
-              <p className="text-slate-300 mb-1">Successfully ingested your vault.</p>
-              <div className="flex gap-4 mt-4 text-sm text-slate-400 bg-black/20 p-4 rounded-xl">
-                <div><span className="text-white font-mono">{result?.num_files}</span> files processed</div>
-                <div><span className="text-white font-mono">{result?.num_chunks}</span> knowledge chunks</div>
+            <div className="flex flex-col items-center page-enter">
+              <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6 glow-success">
+                <CheckCircle2 size={40} className="text-emerald-400" />
               </div>
-              <button 
-                onClick={() => { setFile(null); setStatus('idle'); }}
-                className="mt-8 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
-              >
-                Upload Another
-              </button>
+              <h3 className="text-2xl font-bold text-white mb-2">Vault Indexed Successfully</h3>
+              <p className="text-slate-400 mb-6">Your knowledge base is ready for AI-powered drafting.</p>
+              
+              <div className="flex gap-6 mb-8">
+                <div className="text-center px-6 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <div className="text-2xl font-bold font-mono text-white">{result?.num_files}</div>
+                  <div className="text-xs text-slate-500 mt-1">Files Processed</div>
+                </div>
+                <div className="text-center px-6 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <div className="text-2xl font-bold font-mono text-white">{result?.num_chunks}</div>
+                  <div className="text-xs text-slate-500 mt-1">Knowledge Chunks</div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button onClick={() => { setFile(null); setStatus('idle'); }} className="btn-ghost text-sm">
+                  Upload Another
+                </button>
+                <Link to="/compose" className="btn-primary flex items-center gap-2 text-sm !py-2.5">
+                  Start Composing <ArrowRight size={16} />
+                </Link>
+              </div>
             </div>
           ) : status === 'uploading' ? (
-            <div className="flex flex-col items-center text-indigo-400">
-              <Loader2 size={48} className="animate-spin mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Processing Vault...</h3>
-              <p className="text-slate-400 text-sm max-w-xs text-center">Extracting markdown, chunking text, and generating embeddings. This may take a minute.</p>
+            <div className="flex flex-col items-center page-enter">
+              <div className="relative mb-6">
+                <div className="w-16 h-16 rounded-full border-[3px] border-indigo-500/20 border-t-indigo-400 animate-spin" />
+                <Sparkles size={20} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-indigo-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Processing Your Vault</h3>
+              <p className="text-slate-400 text-sm max-w-xs text-center leading-relaxed">
+                Extracting markdown, generating embeddings, and indexing into the vector database...
+              </p>
+              <div className="w-48 h-1.5 bg-white/[0.04] rounded-full mt-6 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full shimmer" style={{ width: '60%' }} />
+              </div>
             </div>
           ) : (
             <>
-              <div className="bg-slate-800/50 p-4 rounded-full mb-4 ring-1 ring-white/10 shadow-xl">
-                {file ? <FileArchive size={32} className="text-indigo-400" /> : <Upload size={32} className="text-slate-400" />}
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-5 transition-all duration-500 ${
+                file
+                  ? 'bg-indigo-500/10 border border-indigo-500/20'
+                  : 'bg-white/[0.04] border border-white/[0.06]'
+              }`} style={file ? { animation: 'float 3s ease-in-out infinite' } : {}}>
+                {file ? <FileArchive size={28} className="text-indigo-400" /> : <Upload size={28} className="text-slate-500" />}
               </div>
-              
-              <h3 className="text-xl font-semibold text-white mb-2">
-                {file ? file.name : 'Select a .zip file'}
+
+              <h3 className="text-lg font-semibold text-white mb-1">
+                {file ? file.name : 'Drop your vault here'}
               </h3>
-              
-              <p className="text-slate-400 text-sm mb-8">
-                {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'Drag and drop or click to browse'}
+              <p className="text-slate-500 text-sm mb-8">
+                {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'or click to browse for a .zip file'}
               </p>
 
-              <input 
-                type="file" 
-                accept=".zip" 
-                className="hidden" 
-                ref={fileInputRef} 
-                onChange={handleFileChange}
-              />
+              <input type="file" accept=".zip" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
 
-              <div className="flex gap-4">
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors border border-white/10 shadow-sm"
-                >
+              <div className="flex gap-3">
+                <button onClick={() => fileInputRef.current?.click()} className="btn-ghost border border-white/[0.06] text-sm">
                   {file ? 'Change File' : 'Browse Files'}
                 </button>
-                
                 {file && (
-                  <button 
-                    onClick={handleUpload}
-                    className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium transition-colors shadow-lg shadow-indigo-500/25 border border-indigo-400/20 flex items-center gap-2 animate-in slide-in-from-right-4"
-                  >
-                    <Upload size={18} />
+                  <button onClick={handleUpload} className="btn-primary flex items-center gap-2 text-sm !py-2.5 page-enter">
+                    <Upload size={16} />
                     Start Ingestion
                   </button>
                 )}
@@ -131,11 +164,11 @@ export default function VaultUpload() {
         </div>
 
         {status === 'error' && (
-          <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-400 animate-in slide-in-from-top-2">
-            <AlertCircle size={20} className="shrink-0 mt-0.5" />
+          <div className="mt-6 p-4 bg-red-500/[0.06] border border-red-500/15 rounded-xl flex items-start gap-3 text-red-400 page-enter">
+            <AlertCircle size={18} className="shrink-0 mt-0.5" />
             <div>
-              <h4 className="font-medium">Upload Failed</h4>
-              <p className="text-sm opacity-80 mt-1">{errorMsg}</p>
+              <h4 className="font-medium text-sm">Upload Failed</h4>
+              <p className="text-xs opacity-80 mt-1">{errorMsg}</p>
             </div>
           </div>
         )}
