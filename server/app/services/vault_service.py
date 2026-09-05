@@ -4,11 +4,11 @@ import zipfile
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct, Filter, FieldCondition, MatchValue
 from langchain_text_splitters import MarkdownTextSplitter
-from sentence_transformers import SentenceTransformer
+import google.generativeai as genai
 from app.config import settings
 from app.utils.markdown_parser import parse_markdown
 
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
+genai.configure(api_key=settings.GEMINI_API_KEY)
 
 qdrant = QdrantClient(url=settings.QDRANT_URL, api_key=settings.QDRANT_API_KEY if settings.QDRANT_API_KEY else None)
 COLLECTION_NAME = "vault_notes"
@@ -19,7 +19,7 @@ def init_qdrant():
     except Exception:
         qdrant.create_collection(
             collection_name=COLLECTION_NAME,
-            vectors_config=VectorParams(size=384, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=3072, distance=Distance.COSINE),
         )
         
     try:
@@ -98,7 +98,12 @@ def process_vault_zip(zip_path: str, extract_to: str, user_id: str, vault_id: st
                 
                 for i, chunk in enumerate(chunks):
                     chunk_text = chunk.page_content
-                    embedding = embedder.encode(chunk_text).tolist()
+                    
+                    response = genai.embed_content(
+                        model="models/gemini-embedding-001",
+                        content=chunk_text
+                    )
+                    embedding = response["embedding"]
                     
                     point_id = str(uuid.uuid4())
                     points.append(
