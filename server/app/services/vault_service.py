@@ -66,6 +66,7 @@ def process_vault_zip(zip_path: str, extract_to: str, user_id: str, vault_id: st
     splitter = MarkdownTextSplitter(chunk_size=800, chunk_overlap=200)
     
     points = []
+    file_docs = []
     num_files = 0
     num_chunks = 0
     
@@ -84,6 +85,14 @@ def process_vault_zip(zip_path: str, extract_to: str, user_id: str, vault_id: st
                 metadata = parsed["metadata"]
                 
                 note_title = file.replace(".md", "")
+                
+                file_docs.append({
+                    "user_id": user_id,
+                    "vault_id": vault_id,
+                    "filename": rel_path.replace("\\", "/"),
+                    "title": note_title,
+                    "content": content
+                })
                 
                 chunks = splitter.create_documents([text_content])
                 
@@ -115,4 +124,8 @@ def process_vault_zip(zip_path: str, extract_to: str, user_id: str, vault_id: st
         # Upload new points
         qdrant.upload_points(collection_name=COLLECTION_NAME, points=points)
 
-    return {"num_files": num_files, "num_chunks": num_chunks}
+    return {
+        "num_files": num_files,
+        "num_chunks": num_chunks,
+        "file_docs": file_docs
+    }
