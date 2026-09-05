@@ -5,59 +5,53 @@ export default function ComposeForm({ onGenerate, isLoading }) {
   const [to, setTo] = useState('');
   const [prompt, setPrompt] = useState('');
 
-  const handleSubmit = (e) => {
+  const submit = (e) => {
     e.preventDefault();
-    if (!prompt.trim()) return;
-    onGenerate({ prompt, to });
+    if (prompt.trim()) onGenerate({ prompt, to });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-          <Send size={14} className="text-slate-500" />
-          Recipient
-          <span className="text-slate-600 text-xs font-normal">(optional)</span>
+    <form onSubmit={submit} className="space-y-5">
+      <div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6, letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'JetBrains Mono' }}>
+          <Send size={11} /> Recipient
+          <span style={{ color: 'var(--text-3)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>optional</span>
         </label>
         <input
           type="email"
+          className="field"
+          placeholder="colleague@example.com"
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          placeholder="colleague@example.com"
-          className="input-premium"
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-          <Sparkles size={14} className="text-indigo-400" />
-          What should the email be about?
+      <div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6, letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'JetBrains Mono' }}>
+          <Sparkles size={11} style={{ color: 'var(--amber)' }} /> What should the email be about?
         </label>
         <textarea
+          className="field"
+          style={{ resize: 'none', lineHeight: 1.6, height: 140 }}
+          placeholder="Draft an email summarizing the Q3 product roadmap milestones to Alice, referencing who owns each initiative..."
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Draft an email to Alice summarizing the key milestones from the Q3 Roadmap, and mention who is leading each initiative..."
-          rows={5}
-          className="input-premium resize-none leading-relaxed"
           required
         />
-        <p className="text-xs text-slate-600 mt-1">
-          The AI will search your vault for relevant context before drafting.
+        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 6, fontFamily: 'JetBrains Mono' }}>
+          // AI will search your vault before drafting
         </p>
       </div>
 
-      <div className="flex justify-end mt-1">
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button
           type="submit"
           disabled={isLoading || !prompt.trim()}
-          className="btn-primary flex items-center gap-2.5 group"
+          className="btn btn-amber"
         >
-          {isLoading ? (
-            <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-          ) : (
-            <Sparkles size={18} className="group-hover:rotate-12 transition-transform" />
-          )}
-          {isLoading ? 'Generating Draft...' : 'Generate Draft'}
+          {isLoading
+            ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Generating...</>
+            : <><Sparkles size={14} /> Generate draft</>}
         </button>
       </div>
     </form>
