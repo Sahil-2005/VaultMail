@@ -1,10 +1,10 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchValue
-from sentence_transformers import SentenceTransformer
+import google.generativeai as genai
 from app.config import settings
 
-# Use the same embedder
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
+# Configure Gemini API
+genai.configure(api_key=settings.GEMINI_API_KEY)
 
 qdrant = QdrantClient(url=settings.QDRANT_URL, api_key=settings.QDRANT_API_KEY if settings.QDRANT_API_KEY else None)
 COLLECTION_NAME = "vault_notes"
@@ -14,7 +14,11 @@ def search_vault_chunks(query: str, user_id: str, vault_id: str, limit: int = 5)
     Search the vault for relevant chunks based on semantic similarity.
     Filters by user_id and vault_id.
     """
-    query_vector = embedder.encode(query).tolist()
+    response = genai.embed_content(
+        model="models/gemini-embedding-001",
+        content=query
+    )
+    query_vector = response["embedding"]
     
     try:
         search_result = qdrant.search(
