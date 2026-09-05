@@ -1,4 +1,7 @@
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export const apiFetch = async (url, options = {}) => {
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
   const token = localStorage.getItem('vaultmail_token');
   
   const headers = {
@@ -20,7 +23,7 @@ export const apiFetch = async (url, options = {}) => {
     }
   }
 
-  const response = await fetch(url, {
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
   });
