@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Database, Cpu, Send, ExternalLink } from 'lucide-react';
-import vaultMailVideo from '../assets/vaultMail.mp4';
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuth();
@@ -104,15 +103,12 @@ export default function LandingPage() {
             </div>
             {/* Video content */}
             <div className="w-full bg-black relative" style={{ aspectRatio: '16/9' }}>
-              <video 
-                src={vaultMailVideo} 
-                controls 
-                autoPlay 
-                muted 
-                loop 
-                className="w-full h-full object-contain"
-                style={{ outline: 'none' }}
-              />
+              <iframe
+                src="https://drive.google.com/file/d/11IMnpzwm5-K33-BbU5KVS3l5i-AoKTx4/preview"
+                className="w-full h-full border-0"
+                allow="autoplay"
+                title="VaultMail Demo Video"
+              ></iframe>
             </div>
           </div>
           
